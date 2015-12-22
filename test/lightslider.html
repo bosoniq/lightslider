@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="../bower_components/qunit/qunit/qunit.css" media="screen">
         <script src="../bower_components/qunit/qunit/qunit.js"></script>
         <!-- Load local lib and tests. -->
+        <link rel="stylesheet" href="../src/css/lightslider.css" media="screen">
         <script src="../src/js/lightslider.js"></script>
         <script src="lightslider_test.js"></script>
         <!-- Removing access to jQuery and $. But it'll still be available as _$, if
@@ -19,9 +20,26 @@
     <body>
         <div id="qunit"></div>
         <div id="qunit-fixture">
-            <span>lame test markup</span>
-            <span>normal test markup</span>
-            <span>awesome test markup</span>
+            <ul id="image-gallery" class="gallery list-unstyled cS-hidden">
+                <li data-thumb="img/thumb/cS-1.jpg"> 
+                    <img src="img/cS-1.jpg" />
+                     </li>
+                <li data-thumb="img/thumb/cS-2.jpg"> 
+                    <img src="img/cS-2.jpg" />
+                     </li>
+                <li data-thumb="img/thumb/cS-3.jpg"> 
+                    <img src="img/cS-3.jpg" />
+                     </li>
+                <li data-thumb="img/thumb/cS-4.jpg"> 
+                    <img src="img/cS-4.jpg" />
+                     </li>
+                <li data-thumb="img/thumb/cS-5.jpg"> 
+                    <img src="img/cS-5.jpg" />
+                     </li>
+                <li data-thumb="img/thumb/cS-6.jpg"> 
+                    <img src="img/cS-6.jpg" />
+                     </li>
+            </ul>
         </div>
     </body>
 </html>

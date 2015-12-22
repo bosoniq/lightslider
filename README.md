@@ -122,6 +122,7 @@ add the Following code to the &lt;head&gt; of your document.
             thumbItem:10,
             pager: true,
             gallery: false,
+            galleryNav: false,
             galleryMargin: 5,
             thumbMargin: 5,
             currentPagerPosition: 'middle',

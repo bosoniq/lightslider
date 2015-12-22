@@ -1,4 +1,4 @@
-/*! lightslider - v1.1.5 - 2015-10-31
+/*! lightslider - v1.1.5 - 2015-12-22
 * https://github.com/sachinchoolur/lightslider
 * Copyright (c) 2015 Sachin N; Licensed MIT */
 (function ($, undefined) {
@@ -31,6 +31,7 @@
         thumbItem: 10,
         pager: true,
         gallery: false,
+        galleryNav: false,
         galleryMargin: 5,
         thumbMargin: 5,
         currentPagerPosition: 'middle',
@@ -79,8 +80,10 @@
             elSize = 0,
             $slide = '',
             scene = 0,
+            sceneT = 0,
             property = (settings.vertical === true) ? 'height' : 'width',
             gutter = (settings.vertical === true) ? 'margin-bottom' : 'margin-right',
+            lastNavEl = false,
             slideValue = 0,
             pagerWidth = 0,
             slideWidth = 0,
@@ -184,8 +187,9 @@
                 }
             },
             controls: function () {
+                var contString = '<div class="lSAction"><a class="lSPrev">' + settings.prevHtml + '</a><a class="lSNext">' + settings.nextHtml + '</a></div>';
                 if (settings.controls) {
-                    $el.after('<div class="lSAction"><a class="lSPrev">' + settings.prevHtml + '</a><a class="lSNext">' + settings.nextHtml + '</a></div>');
+                    $el.after(contString);
                     if (!settings.autoWidth) {
                         if (length <= settings.item) {
                             $slide.find('.lSAction').hide();
@@ -209,6 +213,70 @@
                         return false;
                     });
                 }
+                if (settings.galleryNav) {
+                    var lSPagerWrapper = $slide.siblings('.lSPagerWrapper');
+                    lSPagerWrapper.append(contString);
+                    if(settings.vertical) {
+                        lSPagerWrapper.find('.lSAction').css('height', settings.verticalHeight);
+                    }
+                    lSPagerWrapper.find('.lSAction').on('click', 'a', function() {
+                        var dir;
+                        if ($(this).hasClass('lSPrev')) {
+                            dir = false;
+                        } else {
+                            dir = true;
+                        }
+                        plugin.galleryNavMove(dir);
+                   });
+                }
+            },
+            galleryNavMove: function(dir) {
+                var isNext = dir,
+                    pagerNavigated = true,
+                    bottom = Math.ceil(settings.thumbItem / 2);
+
+                if (lastNavEl === 'gallery') {
+                    pagerNavigated = false;
+                    if (!settings.loop) {
+                        sceneT++;
+                    }
+                }
+                if (isNext) {
+                    if (!pagerNavigated) {
+                        sceneT = sceneT - bottom;
+                        if (sceneT > $el.getTotalSlideCount() - bottom) {
+                            sceneT = 1;
+                        } else {
+                            if (sceneT < 1) {
+                                sceneT = 1;
+                            } else {
+                                sceneT++;
+                            } 
+                        }
+                    } else {
+                        sceneT++;
+                    } 
+                } else {
+                    if (settings.loop && sceneT === 0) {
+                        sceneT = $el.getTotalSlideCount();
+                    } 
+                    if (!pagerNavigated) {
+                        sceneT -= bottom;
+                        if (sceneT >= ($el.getTotalSlideCount() - settings.thumbItem)) {
+                            sceneT = $el.getTotalSlideCount() - settings.thumbItem - 1;
+                        } else {
+                            sceneT--;
+                        }
+                    } else {
+                        sceneT--;
+                    }
+                } 
+                var sc = sceneT;
+                var $pager = $slide.parent().find('.lSPager');
+                var thumbSlide = sc * (thumbWidth + settings.thumbMargin);
+                this.move($pager, thumbSlide);
+                $el.pause();
+                plugin.chkEnableThumbNav(true);
             },
             initialStyle: function () {
                 var $this = this;
@@ -409,6 +477,10 @@
                         if (settings.gallery === true) {
                             $this.slideThumb();
                         }
+                        if (settings.galleryNav) {
+                            sceneT = scene;
+                            plugin.chkEnableThumbNav();
+                        }
                         return false;
                     });
                 };
@@ -417,12 +489,14 @@
                     if (settings.gallery) {
                         cl = 'lSGallery';
                     }
-                    $slide.after('<ul class="lSPager ' + cl + '"></ul>');
+                    $slide.after('<div class="lSPagerWrapper"><ul class="lSPager ' + cl + '"></ul></div>');
                     var gMargin = (settings.vertical) ? 'margin-left' : 'margin-top';
                     $slide.parent().find('.lSPager').css(gMargin, settings.galleryMargin + 'px');
+                    if(settings.vertical) {
+                        $('.lSPagerWrapper').css('width', settings.vThumbWidth);
+                    }
                     refresh.createPager();
                 }
-
                 setTimeout(function () {
                     refresh.init();
                 }, 0);
@@ -642,6 +716,43 @@
                 }
                 this.move($pager, thumbSlide);
             },
+            chkEnableThumbNav: function(galButton) {
+                var lowerLimit = Math.ceil(settings.thumbItem / 2),
+                    upperLimit = $el.getTotalSlideCount() - lowerLimit,
+                    pagerBttnCont = $('.lSPagerWrapper .lSAction'),
+                    result = {next : 'none', prev : 'none'},
+                    sc = scene;
+                if (settings.loop === false) {
+                    sc++;
+                }
+                if (!galButton) {
+                    lastNavEl = 'gallery';
+                    if (sc > lowerLimit && sc <= $el.getTotalSlideCount() || sc === 0) {
+                        result.prev = 'block';
+                    } else {
+                        result.prev = 'none';
+                    }
+                    if ((sc <= upperLimit && sc > 0) || sc > $el.getTotalSlideCount()) {
+                        result.next = 'block';
+                    } else {
+                        result.next = 'none';
+                    } 
+                } else {
+                    lastNavEl = 'pager';
+                    if (sceneT > 0) {
+                        result.prev = 'block';
+                    } else {
+                        result.prev = 'none';
+                    }
+                    if ( sceneT < $el.getTotalSlideCount() - settings.thumbItem) {
+                        result.next = 'block';
+                    } else {
+                        result.next = 'none';
+                    }  
+                }
+                pagerBttnCont.children('.lSPrev').css('display', result.prev)
+                             .end().children('.lSNext').css('display', result.next);
+            },
             auto: function () {
                 if (settings.auto) {
                     clearInterval(interval);
@@ -689,7 +800,6 @@
                     this.move($el, swipeVal);
                 }
             },
-
             touchEnd: function (distance) {
                 $slide.css('transition-duration', settings.speed + 'ms');
                 if (settings.mode === 'slide') {
@@ -746,10 +856,9 @@
                         $el.goToNextSlide();
                     }
                 }
+                sceneT = scene;
+                plugin.chkEnableThumbNav();
             },
-
-
-
             enableDrag: function () {
                 var $this = this;
                 if (!isTouch) {
@@ -983,6 +1092,8 @@
                     }, 400);
                 }
             }
+            sceneT = scene;
+            plugin.chkEnableThumbNav();
         };
         $el.goToNextSlide = function () {
             var nextI = true;
@@ -1012,6 +1123,8 @@
                     }, 400);
                 }
             }
+            sceneT = scene;
+            plugin.chkEnableThumbNav();
         };
         $el.mode = function (_touch) {
             if (settings.adaptiveHeight === true && settings.vertical === false) {

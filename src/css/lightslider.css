@@ -72,6 +72,9 @@
 /** /!!! End of core css Should not edit !!!/**/
 
 /* Pager */
+.lSSlideOuter .lSPagerWrapper {
+    position:relative;
+}
 .lSSlideOuter .lSPager.lSpg {
     margin: 10px 0 0;
     padding: 0;
@@ -97,6 +100,9 @@
 }
 .lSSlideOuter .lSPager.lSpg > li:hover a, .lSSlideOuter .lSPager.lSpg > li.active a {
     background-color: #428bca;
+}
+.lSSlideOuter .lSPagerWrapper .lSPrev {
+    display:none;
 }
 .lSSlideOuter .media {
     opacity: 0.8;
